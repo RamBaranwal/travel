@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Navigation, Settings2, Package, MapPin, Calendar, Users, Map } from 'lucide-react';
+import { ArrowLeft, Navigation, Settings2, Package, MapPin, Calendar, Users, Map, Moon, Sun } from 'lucide-react';
 import FixBudgetTrip from '../components/modes/FixBudgetTrip';
 import FreeHandCustom from '../components/modes/FreeHandCustom';
 import PrePlannedPackages from '../components/modes/PrePlannedPackages';
 import BudgetBar from '../components/BudgetBar';
 import LocalDiscoverySidebar from '../components/LocalDiscoverySidebar';
+import { useDarkMode } from '../hooks/useDarkMode';
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const [activeMode, setActiveMode] = useState('free-hand');
+  const [isDark, setIsDark] = useDarkMode();
   
   // Shared state across modes
   const [tripState, setTripState] = useState({
@@ -84,6 +86,9 @@ export default function Dashboard() {
           </div>
           
           <div className="flex items-center gap-3">
+            <button onClick={() => setIsDark(!isDark)} className="p-2 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors" aria-label="Toggle Dark Mode">
+              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
             <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm">
               JD
             </div>

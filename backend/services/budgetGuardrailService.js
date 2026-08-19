@@ -45,7 +45,7 @@ async function evaluateBudget(items, budgetCap, destination, travelers = 1, tota
     // Find cheaper alternatives in the destination
     const alternatives = await DestinationCatalog.find({
       location: destination,
-      category: 'hotel',
+      category: 'accommodation',
       estimatedCost: { $lt: hotel.cost }
     }).sort({ estimatedCost: -1 }).limit(5); // Get closest cheaper alternatives
 
@@ -59,7 +59,55 @@ async function evaluateBudget(items, budgetCap, destination, travelers = 1, tota
         originalCost: hotel.cost,
         suggestedCost: alt.estimatedCost,
         savings: savings,
-        message: `Swap ${hotel.name} for ${alt.name} to save $${savings}`
+        message: `Swap ${hotel.name} for ${alt.name} to save $${savings.toFixed(2)}`
+      });
+    });
+  }
+
+  // Look for cheaper transport alternatives
+  const currentTransports = items.filter(i => i.category === 'transport' || i.type === 'transport');
+  for (const transport of currentTransports) {
+    const alternatives = await DestinationCatalog.find({
+      location: destination,
+      category: 'transport',
+      estimatedCost: { $lt: transport.cost }
+    }).sort({ estimatedCost: -1 }).limit(5);
+
+    alternatives.forEach(alt => {
+      const savings = (transport.cost - alt.estimatedCost) * travelers;
+      suggestions.push({
+        type: 'trade-off',
+        category: 'transport',
+        originalItem: transport.name,
+        suggestedItem: alt.name,
+        originalCost: transport.cost,
+        suggestedCost: alt.estimatedCost,
+        savings: savings,
+        message: `Swap ${transport.name} for ${alt.name} to save $${savings.toFixed(2)}`
+      });
+    });
+  }
+
+  // Look for cheaper food alternatives
+  const currentFoods = items.filter(i => i.category === 'food' || i.category === 'local-food');
+  for (const food of currentFoods) {
+    const alternatives = await DestinationCatalog.find({
+      location: destination,
+      category: 'food',
+      estimatedCost: { $lt: food.cost }
+    }).sort({ estimatedCost: -1 }).limit(5);
+
+    alternatives.forEach(alt => {
+      const savings = (food.cost - alt.estimatedCost); // Food is added per instance (multiplier 1)
+      suggestions.push({
+        type: 'trade-off',
+        category: 'food',
+        originalItem: food.name,
+        suggestedItem: alt.name,
+        originalCost: food.cost,
+        suggestedCost: alt.estimatedCost,
+        savings: savings,
+        message: `Swap ${food.name} for ${alt.name} to save $${savings.toFixed(2)}`
       });
     });
   }

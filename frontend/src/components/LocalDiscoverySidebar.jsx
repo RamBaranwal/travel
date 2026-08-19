@@ -3,11 +3,24 @@ import { Compass, Palmtree, Utensils, Brush, Sparkles } from 'lucide-react';
 
 export default function LocalDiscoverySidebar({ destination }) {
   // In a real app, this would fetch from /api/trips/catalog?destination=...
-  const mockCatalog = [
-    { name: 'Otagi Nenbutsu-ji', category: 'hidden-gem', cost: 5, rating: 4.8 },
-    { name: 'Nishiki Market Yuba', category: 'local-food', cost: 15, rating: 4.7 },
-    { name: 'Kintsugi Workshop', category: 'artisan', cost: 60, rating: 4.9 },
-  ];
+  const indiaCatalog = {
+    'Ladakh, India': [
+      { name: 'SECMOL Solar Campus', category: 'hidden-gem', cost: 5, rating: 4.8 },
+      { name: 'Apricot Orchard Visit', category: 'local-food', cost: 10, rating: 4.7 },
+      { name: 'Pashmina Weaving', category: 'artisan', cost: 20, rating: 4.9 },
+    ],
+    'Kolkata, India': [
+      { name: 'Kumartuli Idol Makers', category: 'artisan', cost: 2, rating: 4.8 },
+      { name: 'College St Coffee House', category: 'local-food', cost: 5, rating: 4.6 },
+      { name: 'South Park Street Cemetery', category: 'hidden-gem', cost: 1, rating: 4.7 },
+    ],
+    'Goa, India': [
+      { name: 'Divar Island Ferry', category: 'hidden-gem', cost: 2, rating: 4.7 },
+      { name: 'Feni Distillery Tour', category: 'local-food', cost: 15, rating: 4.9 },
+      { name: 'Azulejos Tile Painting', category: 'artisan', cost: 25, rating: 4.8 },
+    ]
+  };
+  const mockCatalog = indiaCatalog[destination] || indiaCatalog['Ladakh, India'];
 
   const getIcon = (category) => {
     switch(category) {

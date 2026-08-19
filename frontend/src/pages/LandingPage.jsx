@@ -1,25 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Wallet, MapPin, Calendar, CheckCircle2, Moon, Sun } from 'lucide-react';
+import { useDarkMode } from '../hooks/useDarkMode';
 
 export default function LandingPage() {
   const navigate = useNavigate();
-  const [budget, setBudget] = useState(1500);
+  const [budget, setBudget] = useState(500);
   const [hotelTier, setHotelTier] = useState('Standard');
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useDarkMode();
   const [konamiUnlocked, setKonamiUnlocked] = useState(false);
   const revealRef = useRef(null);
   const [isRevealed, setIsRevealed] = useState(false);
 
   // Dark Mode Toggle
-  const toggleDarkMode = () => {
-    setIsDark(!isDark);
-    if (!isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  };
+  const toggleDarkMode = () => setIsDark(!isDark);
 
   // Konami Code Easter Egg
   useEffect(() => {
@@ -56,8 +50,8 @@ export default function LandingPage() {
   }, []);
 
   // Interactive mock widget logic
-  const hotelCosts = { Budget: 400, Standard: 800, Luxury: 1400 };
-  const baseCost = 200; // flights/transit
+  const hotelCosts = { Budget: 75, Standard: 300, Luxury: 750 };
+  const baseCost = 120; // flights/transit
   const remaining = budget - (hotelCosts[hotelTier] + baseCost);
 
   return (

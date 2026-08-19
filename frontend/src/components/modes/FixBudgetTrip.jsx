@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Target, Search, Loader2, Trash2, Car, BedDouble, Utensils, MapIcon, AlertTriangle } from 'lucide-react';
 
+const API_URL = import.meta.env.VITE_API_URL || '/api/trips';
+
 export default function FixBudgetTrip({ tripState, setTripState, setTradeOffs }) {
   const [loading, setLoading] = useState(false);
   const [localBudget, setLocalBudget] = useState(tripState.budgetCap);
@@ -47,7 +49,7 @@ export default function FixBudgetTrip({ tripState, setTripState, setTradeOffs })
       let res;
       let catalog;
       try {
-        res = await fetch(`/api/trips/catalog?destination=${encodeURIComponent(tripState.destination)}`);
+        res = await fetch(`${API_URL}/catalog?destination=${encodeURIComponent(tripState.destination)}`);
         if (!res.ok) throw new Error("Backend not available");
         catalog = await res.json();
       } catch (e) {
@@ -179,7 +181,7 @@ export default function FixBudgetTrip({ tripState, setTripState, setTradeOffs })
       let calcRes;
       let calcData;
       try {
-        calcRes = await fetch('/api/trips/calculate', {
+        calcRes = await fetch(`${API_URL}/calculate`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

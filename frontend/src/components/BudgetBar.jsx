@@ -1,4 +1,7 @@
-import { AlertCircle, TrendingDown, ArrowRight } from 'lucide-react';
+import { useState } from 'react';
+import { AlertCircle, TrendingDown, ArrowRight, Loader2 } from 'lucide-react';
+
+const API_URL = import.meta.env.VITE_API_URL || '/api/trips';
 
 export default function BudgetBar({ tripState, tradeOffs, setTripState }) {
   const { budgetCap, totalCost } = tripState;
@@ -6,6 +9,9 @@ export default function BudgetBar({ tripState, tradeOffs, setTripState }) {
   const isOverBudget = remaining < 0;
 
   const percentage = Math.min(100, (totalCost / budgetCap) * 100);
+
+  const [isSaving, setIsSaving] = useState(false);
+  const [statusMsg, setStatusMsg] = useState(null);
 
   const acceptTradeOff = (tradeOff) => {
     // Modify trip state to accept tradeoff
@@ -18,6 +24,25 @@ export default function BudgetBar({ tripState, tradeOffs, setTripState }) {
       });
       return { ...prev, items: newItems };
     });
+  };
+
+  const handleConfirm = async () => {
+    setIsSaving(true);
+    setStatusMsg(null);
+    try {
+      const response = await fetch(`${API_URL}/save`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(tripState)
+      });
+      if (!response.ok) throw new Error("Failed to save trip");
+      setStatusMsg({ type: 'success', text: "Trip booked successfully!" });
+    } catch (err) {
+      console.error(err);
+      setStatusMsg({ type: 'error', text: "Failed to confirm booking." });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -81,9 +106,21 @@ export default function BudgetBar({ tripState, tradeOffs, setTripState }) {
         </div>
       )}
 
-      <button className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors">
-        Confirm Booking
-      </button>
+      <div className="space-y-3">
+        <button 
+          onClick={handleConfirm}
+          disabled={!tripState.items || tripState.items.length === 0 || isSaving}
+          className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isSaving && <Loader2 className="w-5 h-5 animate-spin" />}
+          {isSaving ? "Confirming..." : "Confirm Booking"}
+        </button>
+        {statusMsg && (
+          <div className={`text-center text-sm font-bold ${statusMsg.type === 'success' ? 'text-emerald-500' : 'text-red-500'}`}>
+            {statusMsg.text}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

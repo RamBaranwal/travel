@@ -41,6 +41,8 @@ const dailyLocalTransports = [
   { id: 'local-rental', name: 'Daily Bike Rental Share', cost: 20 }
 ];
 
+const API_URL = import.meta.env.VITE_API_URL || '/api/trips';
+
 export default function FreeHandCustom({ tripState, setTripState }) {
   const [catalog, setCatalog] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -50,13 +52,13 @@ export default function FreeHandCustom({ tripState, setTripState }) {
   const [rentalTab, setRentalTab] = useState('cars');
   const [selectedVehicle, setSelectedVehicle] = useState(rentalFleet.cars[0]);
   const [modalDist, setModalDist] = useState(500);
-  const [modalFuelPrice, setModalFuelPrice] = useState(100);
+  const [modalFuelPrice, setModalFuelPrice] = useState(1.5);
   const [activeDayTarget, setActiveDayTarget] = useState(1);
 
   useEffect(() => {
     if (tripState.destination) {
       setLoading(true);
-      fetch(`/api/trips/catalog?destination=${encodeURIComponent(tripState.destination)}`)
+      fetch(`${API_URL}/catalog?destination=${encodeURIComponent(tripState.destination)}`)
         .then(res => res.json())
         .then(data => {
           setCatalog(data);
@@ -414,6 +416,8 @@ export default function FreeHandCustom({ tripState, setTripState }) {
                   <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1">Estimated Distance (km)</label>
                   <input
                     type="number"
+                    min="1"
+                    step="1"
                     value={modalDist}
                     onChange={(e) => setModalDist(parseFloat(e.target.value) || 0)}
                     className="w-full bg-white dark:bg-slate-900 border rounded-lg px-3 py-2 font-medium outline-none"
@@ -423,6 +427,8 @@ export default function FreeHandCustom({ tripState, setTripState }) {
                   <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1">Fuel Price ($/Liter)</label>
                   <input
                     type="number"
+                    min="0.1"
+                    step="0.1"
                     value={modalFuelPrice}
                     onChange={(e) => setModalFuelPrice(parseFloat(e.target.value) || 0)}
                     className="w-full bg-white dark:bg-slate-900 border rounded-lg px-3 py-2 font-medium outline-none"
