@@ -1,11 +1,59 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Wallet, MapPin, Calendar, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, Wallet, MapPin, Calendar, CheckCircle2, Moon, Sun } from 'lucide-react';
 
 export default function LandingPage() {
   const navigate = useNavigate();
   const [budget, setBudget] = useState(1500);
   const [hotelTier, setHotelTier] = useState('Standard');
+  const [isDark, setIsDark] = useState(false);
+  const [konamiUnlocked, setKonamiUnlocked] = useState(false);
+  const revealRef = useRef(null);
+  const [isRevealed, setIsRevealed] = useState(false);
+
+  // Dark Mode Toggle
+  const toggleDarkMode = () => {
+    setIsDark(!isDark);
+    if (!isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  };
+
+  // Konami Code Easter Egg
+  useEffect(() => {
+    const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+    let konamiIndex = 0;
+    const handleKeyDown = (e) => {
+      if (e.key === konamiCode[konamiIndex]) {
+        konamiIndex++;
+        if (konamiIndex === konamiCode.length) {
+          setKonamiUnlocked(true);
+          konamiIndex = 0;
+        }
+      } else {
+        konamiIndex = 0;
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Scroll Reveal Observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setIsRevealed(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    if (revealRef.current) observer.observe(revealRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   // Interactive mock widget logic
   const hotelCosts = { Budget: 400, Standard: 800, Luxury: 1400 };
@@ -13,19 +61,24 @@ export default function LandingPage() {
   const remaining = budget - (hotelCosts[hotelTier] + baseCost);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 overflow-hidden">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 overflow-x-hidden w-full">
       {/* Navbar */}
       <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
         <div className="text-2xl font-bold tracking-tighter text-slate-900 dark:text-white flex items-center gap-2">
           <MapPin className="text-blue-600 w-6 h-6" />
-          VoyageCraft
+          VoyageCraft {konamiUnlocked && <span className="text-xs ml-2 bg-gradient-to-r from-purple-500 to-pink-500 text-transparent bg-clip-text font-black tracking-widest uppercase">Secret Mode</span>}
         </div>
-        <button 
-          onClick={() => navigate('/dashboard')}
-          className="text-sm font-medium hover:text-blue-600 transition-colors"
-        >
-          Go to Dashboard
-        </button>
+        <div className="flex items-center gap-6">
+          <button onClick={toggleDarkMode} className="text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors" aria-label="Toggle Dark Mode">
+            {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </button>
+          <button 
+            onClick={() => navigate('/dashboard')}
+            className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+          >
+            Go to Dashboard
+          </button>
+        </div>
       </nav>
 
       {/* Hero Section */}
@@ -70,10 +123,10 @@ export default function LandingPage() {
           <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/20 to-indigo-600/20 blur-3xl -z-10 rounded-full"></div>
           
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-2xl">
-            <div className="flex justify-between items-center mb-8">
-              <h3 className="font-semibold text-lg flex items-center gap-2">
-                <Wallet className="w-5 h-5 text-blue-600"/> 
-                Live Budget Tracker
+            <div className="flex justify-between items-start mb-8">
+              <h3 className="font-semibold text-lg flex flex-col">
+                <span className="flex items-center gap-2"><Wallet className="w-5 h-5 text-blue-600"/> Live Budget Tracker</span>
+                <span className="text-[10px] uppercase tracking-widest text-blue-500 mt-1 font-bold">Interactive Demo</span>
               </h3>
               <div className="text-right">
                 <div className="text-xs text-slate-500">Total Cap</div>
@@ -142,6 +195,35 @@ export default function LandingPage() {
           </div>
         </div>
       </main>
+
+      {/* How it Works Section with Scroll Reveal */}
+      <section 
+        ref={revealRef}
+        className={`container mx-auto px-6 py-24 transition-all duration-1000 ease-out ${
+          isRevealed ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+        }`}
+      >
+        <div className="max-w-3xl mx-auto text-center space-y-8">
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-white">How it works</h2>
+          <div className="grid md:grid-cols-3 gap-8 text-left pt-8">
+            <div className="space-y-3">
+              <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-blue-600 font-bold">1</div>
+              <h4 className="font-semibold text-lg dark:text-white">Set Your Limits</h4>
+              <p className="text-slate-500 dark:text-slate-400 text-sm">Define exactly how much you want to spend and your travel dates.</p>
+            </div>
+            <div className="space-y-3">
+              <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-blue-600 font-bold">2</div>
+              <h4 className="font-semibold text-lg dark:text-white">Auto-Generate</h4>
+              <p className="text-slate-500 dark:text-slate-400 text-sm">Our algorithm matches hotels, flights, and activities within your constraints.</p>
+            </div>
+            <div className="space-y-3">
+              <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-blue-600 font-bold">3</div>
+              <h4 className="font-semibold text-lg dark:text-white">Tweak & Go</h4>
+              <p className="text-slate-500 dark:text-slate-400 text-sm">Swap out any item. The budget recalculates instantly so you never overspend.</p>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
